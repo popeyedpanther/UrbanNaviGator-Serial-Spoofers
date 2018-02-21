@@ -2,7 +2,8 @@
  *  Email: neap@ufl.edu
  *  Last Updated: 2/21/18
  *  
- *  Used to test new Apollo interface code for the Urban NaviGator
+ *  Used to test new Apollo interface code for the Urban NaviGator,
+ *  specifically spoofing the shifting SmartMotor
  *  
  * Notes:
  *  Button Scheme:
@@ -74,7 +75,7 @@ void loop() {
     //---------------------------------------------------------------------------
   
     if(stringComplete){
-      positionCode = getShifterDesiredPosition(recievedMessage);
+      positionCode = parseReceivedMessage(recievedMessage);
 
       if(brakePressed){
         switch(positionCode){
@@ -188,7 +189,7 @@ byte getBrake(){
 }
 
 
-int getShifterDesiredPosition(String message){
+int parseReceivedMessage(String message){
   
   int indexForRemove;
 
@@ -239,7 +240,7 @@ byte initializeShifter(){
     alreadyRecievedRUN = false;
   }
   else if(stringComplete && !gotRun){
-    if(getShifterDesiredPosition(recievedMessage) == 175){
+    if(parseReceivedMessage(recievedMessage) == 175){
       gotRun = true;
       lcd.clear(); 
     }
@@ -249,7 +250,7 @@ byte initializeShifter(){
 
   if(gotRun){
     if(stringComplete && !alreadyRecieved){
-      if(getShifterDesiredPosition(recievedMessage) == 73){
+      if(parseReceivedMessage(recievedMessage) == 73){
         alreadyRecieved = true; 
         lcd.clear();
         lcd.setCursor(0,0);
