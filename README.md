@@ -1,0 +1,2 @@
+# Serial Hardware Interface Spoofers
+These arduino codes will be used to emulate the SmartMotors for steering and shifting along with the myRIO. They will be used to debug initial VehicleController implementations for the Urban NaviGator in Apollo.
