@@ -29,7 +29,11 @@ byte actuating = 0;
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
-void setup() {
+//======================================================================================
+//========================================Setup=========================================
+//======================================================================================
+void setup() 
+{
   //Setup the LCD display
   lcd.begin(16,2);  // Specify the size of the display (16 columns, 2 rows)
   
@@ -37,29 +41,28 @@ void setup() {
   Serial.begin(38400);
 }
 
-
-void loop() {
-  
+//======================================================================================
+//=========================================Loop=========================================
+//======================================================================================
+void loop() 
+{
   int temp;
   unsigned long currentTime = 0, lastTime = 0;
 
-  
-  // put your main code here, to run repeatedly:
-  if(!initialized){
+  if(!initialized)
+  {
     initialized = initializeSteerer();  //Perform the initialization steps the tablet is looking for.
   }
   else{
-    if(stringComplete){ 
+    if(stringComplete)
+    { 
       temp = parseReceivedMessage(recievedMessage);
 
-        switch(temp){
+        switch(temp)
+        {
           case 122:
             lcd.clear();
             lcd.print("Move to " + String(desiredSteeringPosition));
-            break;
-          case 175:
-            initialized = false;
-            alreadyRecievedRUN = true;
             break;
           case 55:
             lcd.setCursor(0, 0);
@@ -76,33 +79,39 @@ void loop() {
         stringComplete = false;
       }
 
-    if(newPositionSet){
+    if(newPositionSet)
+    {
       rotationDirection = sign(currentSteeringPosition-desiredSteeringPosition);
       actuating = true;
       newPositionSet = false;
     }
 
-    if(actuating){
+    if(actuating)
+    {
       currentTime = micros();
       
-      if(currentTime >= lastTime + 150000){
+      if(currentTime >= lastTime + 150000)
+      {
         
         currentSteeringPosition = currentSteeringPosition - rotationDirection*2;
         
         int error = currentSteeringPosition-desiredSteeringPosition;
         
         // Remove any overshoot
-        if(rotationDirection < 0 && error > 0){
+        if(rotationDirection < 0 && error > 0)
+        {
           // Motor was traveling Clock Wise
           currentSteeringPosition = desiredSteeringPosition;
           actuating = false;
         }
-        else if(rotationDirection > 0 && error < 0){
+        else if(rotationDirection > 0 && error < 0)
+        {
           // Motor was traveling Counter Clock Wise
           currentSteeringPosition = desiredSteeringPosition;
           actuating = false;
         }
-        else if(error == 0){
+        else if(error == 0)
+        {
           actuating = false;
         }
         lcd.setCursor(0,1);
@@ -116,22 +125,21 @@ void loop() {
     }
 }
 
-byte initializeSteerer(){
+//======================================================================================
+//=================================Initialize Steerer===================================
+//======================================================================================
+byte initializeSteerer()
+{
   
-  // This looks like the because of the way serialEvent works.
-  if(alreadyRecievedRUN){
-    gotRun = true;
-    alreadyRecievedRUN = false;
-  }
-  else if(stringComplete && !gotRun){
-    if(parseReceivedMessage(recievedMessage) == 175){
-      gotRun = true;
-    }
+  if(stringComplete && !gotRun)
+  {
+    if(parseReceivedMessage(recievedMessage) == 175){ gotRun = true; }
     recievedMessage.remove(0);
     stringComplete = false;
   }
 
-  if(gotRun){
+  if(gotRun)
+  {
     lcd.clear();
     Serial.print("HOMING\r");
     
@@ -148,15 +156,16 @@ byte initializeSteerer(){
       
     return true; 
   }
-  else{
-    lcd.clear()
+  else
+  {    
+    lcd.clear();
     lcd.print("Waiting RUN");
     return false;
   }
 }
 
 //======================================================================================
-//============================Serial Message Parser Function============================
+//==================================Serial Message Parser===============================
 //======================================================================================
 
 int parseReceivedMessage(String message){
@@ -171,27 +180,18 @@ int parseReceivedMessage(String message){
   if(indexForRemove == -1){ return -1;} // If still -1 then there was an error
   message.remove(indexForRemove);
   
-  if(message.length() < 3 || message.length() > 7){ return -1;}   // Message length is incorrect, return -1 for error
+  if(message.length() < 3 || message.length() > 7){ return -2;}   // Message length is incorrect, return -1 for error
   
-  if(message.startsWith("p")){
-    // Grab the characters after "p="
-    for (int i = 2; i < message.length() ;i++){
-      numberString.concat(message[i]);
-    }
-    
+  if(message.startsWith("p"))
+  {
+    for (int i = 2; i < message.length() ;i++){ numberString.concat(message[i]); } // Grab the characters after "p="
     desiredSteeringPosition = numberString.toInt();
     newPositionSet = true;
     return 122;
   }
-  else if(message.equals("RUN")){
-    return 175; // Odd ball, will rehome and reset if it recieves. This to allow not having to shutoff the device to reset.
-  }
-  else if(message.equals("f=2")){
-    return 55;
-  }
-  else{
-    return -2;
-  }
+  else if(message.equals("RUN")){ return 175; }
+  else if(message.equals("f=2")){ return 55; }
+  else{ return -3; }
 }
 
 // Implementation of the sign function. Returns the sign of the value given it it.
@@ -206,17 +206,17 @@ int sign(int val){
 //=================================Serial Event Function================================
 //======================================================================================
 
-void serialEvent() {
-  while (Serial.available()) {
+void serialEvent() 
+{
+  while (Serial.available()) 
+  {
     // get the new byte:
     char inChar = (char)Serial.read();
     // add it to the inputString:
     recievedMessage += inChar;
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
-    if (inChar == '\n' or inChar == '\r') {
-      stringComplete = true;
-    }
+    if (inChar == '\n' or inChar == '\r') { stringComplete = true; }
   }
 }
 

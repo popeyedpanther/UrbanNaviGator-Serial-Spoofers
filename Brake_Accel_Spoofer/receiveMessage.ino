@@ -4,7 +4,7 @@
 
 int parseReceivedMessage(String message)
 {
-  // Implemented for communications with the steering SmartMotor
+  // Change all of this to handle new serial message for Drive-by-Wire board (myRIO).
   
   int indexForRemove;
   String numberString = "";
@@ -15,24 +15,10 @@ int parseReceivedMessage(String message)
   if(indexForRemove == -1){ return -1;} // If still -1 then there was an error
   message.remove(indexForRemove);
   
-  if(message.length() < 3 || message.length() > 7){ return -1;}   // Message length is incorrect, return -1 for error
+  if(message.length() < 3 || message.length() > 7){ return -2;}   // Message length is incorrect, return -1 for error
   
-  if(message.startsWith("p"))
-  {
-    return 0;
-  }
-  else if(message.equals("RUN"))
-  {
-    return 175; // Odd ball, will rehome and reset if it recieves. This to allow not having to shutoff the device to reset.
-  }
-  else if(message.equals("f=2"))
-  {
-    return 55;
-  }
-  else
-  {
-    return -2;
-  }
+  
+
 }
 
 //======================================================================================
