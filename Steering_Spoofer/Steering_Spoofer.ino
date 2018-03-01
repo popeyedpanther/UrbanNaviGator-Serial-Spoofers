@@ -1,6 +1,6 @@
 /*  Written by: Patrick Neal
  *  Email: neap@ufl.edu
- *  Last Updated: 2/21/18
+ *  Last Updated: 3/1/18
  *  
  *  Used to test new Apollo interface code for the Urban NaviGator,
  *  specifically spoofing the steering SmartMotor
@@ -65,6 +65,7 @@ void loop() {
             lcd.setCursor(0, 0);
             lcd.print("NORMAL_SHUTDOWN");
             Serial.print("NORMAL_SHUTDOWN\r");
+            initialized = false;
             break;
           default:
             Serial.print("UNKNOWN_COMMAND\r");
@@ -148,7 +149,7 @@ byte initializeSteerer(){
     return true; 
   }
   else{
-    lcd.setCursor(0, 0);
+    lcd.clear()
     lcd.print("Waiting RUN");
     return false;
   }
@@ -173,10 +174,11 @@ int parseReceivedMessage(String message){
   if(message.length() < 3 || message.length() > 7){ return -1;}   // Message length is incorrect, return -1 for error
   
   if(message.startsWith("p")){
+    // Grab the characters after "p="
     for (int i = 2; i < message.length() ;i++){
       numberString.concat(message[i]);
     }
-    Serial.println(numberString.toInt());
+    
     desiredSteeringPosition = numberString.toInt();
     newPositionSet = true;
     return 122;
@@ -192,6 +194,7 @@ int parseReceivedMessage(String message){
   }
 }
 
+// Implementation of the sign function. Returns the sign of the value given it it.
 int sign(int val){
 
   if (val < 0) {return -1;}
