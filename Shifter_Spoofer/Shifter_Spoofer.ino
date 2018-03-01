@@ -113,6 +113,9 @@ void loop() {
             initialized = false;
             alreadyRecievedRUN = true;
             break;
+          case 55:
+            Serial.print("NORMAL_SHUTDOWN\r");
+            break;
           default:
             Serial.print("UNKNOWN_COMMAND\r");
             break;
@@ -153,6 +156,7 @@ void loop() {
 byte getBrake(){
     static int counterOn = 0, counterOff = 0;
     int buttonValue = 666;
+    
     //-----------------Check Brake Switch----------------------------------------
     buttonValue = analogRead(0);
     if(buttonValue == 0){
@@ -201,8 +205,6 @@ int parseReceivedMessage(String message){
   
   if(message.length() < 3 || message.length() > 5){ return -1;}   // Message length is incorrect, return -1 for error
 
-  Serial.println(message);
-  
   if(message.equals("s=0")){
     return 0;
   }
@@ -223,6 +225,9 @@ int parseReceivedMessage(String message){
   }
   else if(message.equals("h=1")){
     return 73;
+  }
+  else if(message.equals("f=2")){
+    return 55;
   }
   else{
     return -1;
@@ -272,8 +277,7 @@ byte initializeShifter(){
       
       Serial.print("HOMING\r");
     
-      homeShifter();
-      // Perform homing with potentiometer
+      // Simulate homing with potentiometer
       delay(2000);
     
       Serial.print("HOMING_COMPLETE\r");
@@ -297,12 +301,6 @@ byte initializeShifter(){
     return false;
   }
 }
-
-void homeShifter(){
-// This will use the potentiometer to home the shifter to park.
-  
-}
-
 
 //======================================================================================
 //=================================Serial Event Function================================
