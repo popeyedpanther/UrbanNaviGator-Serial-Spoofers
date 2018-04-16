@@ -2,6 +2,7 @@ void updateLCD()
 {
   lcd.clear();
   lcd.print(stateStrings[State-1]);
+  lcd.print(stateStrings[desiredState-1]);
 
   lcd.setCursor(0,1);
   for (int i = 0; i < 5; i++)

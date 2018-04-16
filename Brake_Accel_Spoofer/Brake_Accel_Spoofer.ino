@@ -3,22 +3,22 @@
  *  Last Updated: 2/21/18
  *  
  *  Used to test new Apollo interface code for the Urban NaviGator,
- *  specifically spoofing the shifting SmartMotor
+ *  specifically spoofing the Drive by wire board (myRIO)
  *  
  * Notes:
  *  Button Scheme:
  * 
- *              (N)
- *    (P)  (R)       (B) 
- *              (D) 
+ *              (A)
+ *    (E)  (R)       (B) 
+ *              (I) 
  *            
- *  P = Park            
- *  R = Reverse
- *  N = Neutral
- *  D = Drive
- *  B = toggle brake pedal
+ *  E = E-Stop            
+ *  B = Brake Switch
+ *  A = Auto Switch
+ *  I = Ignition Switch
+ *  U = not implemented
  *  
- *  The brake switch is handled through toggling. Press "B" to go from high->low or low->high, High = pedal is pressed.
+ *  All buttons are handled through toggling. Press button to toggle between on and off. The LCD should display the current state.
  *           
  */
 
@@ -26,16 +26,15 @@
 
 #define MANUAL_STATE      1
 #define AUTONOMOUS_STATE  2
-#define PAUSED_STATE      3
-#define ESTOPPED_STATE    4
-#define INACTIVE_STATE    5
+#define ESTOPPED_STATE    3
+#define INACTIVE_STATE    4
 
 // ---Serial Communication Parameters---
 #define BAUDRATE        115200
 #define TX_PACKET_SIZE  43
 #define HEADER_SIZE     4
-#define RX_PACKET_SIZE  20
-#define CRC_DIVIDER     255
+#define RX_PACKET_SIZE  9
+#define CRC_DIVIDER     256
 
 // ---Loop Timers----
 // The timing is approximately microseconds
@@ -45,19 +44,20 @@
 //======================================================================================
 //===============================Global Variables=======================================
 //======================================================================================
-int State = INACTIVE_STATE;       // start in the inactive State, ignition is off
+int State = INACTIVE_STATE;           // start in the inactive State, ignition is off
 int previousState = INACTIVE_STATE;   // stores the previous State
+int desiredState = INACTIVE_STATE;    // stores the desired state based on state transition logic
 
 bool pauseInEffect = false;               // whether or not we are finished with a pause ramp down.
 bool receiveMessages = true;          // Value used to set the recieveMessage loop, set to false to stop the recieveMessage thread.
 
 // ---Received From Tablet---
-int autoRequested = 0;                  // 0 if no auto requested from tablet, 1 if auto requested from tablet
-int pauseRequested = 0;                 // 0 if no pause requested from tablet, 1 if pause requested from tablet
+byte autoRequested = 0;                  // 0 if no auto requested from tablet, 1 if auto requested from tablet
+byte pauseRequested = 0;                 // 0 if no pause requested from tablet, 1 if pause requested from tablet
 int brakePercentEffortTablet  = 0;        // variable holds the current braking effort commanded by the tablet
 int throttlePercentEffortTablet   = 0;    // variable holds the current throttle effort commanded by the tablet
-// leftBlinker is set from Tablet
-// rightBliner is set from Tablet
+byte leftBlinker = 0;
+byte rightBlinker = 0;
 
 // ---Percent Effort---
 int brakePercentEffortDriver  = 0;      // variable holds the current braking effort determined from the sensors
@@ -68,16 +68,26 @@ double brakePercentEffort     = 0;    // these are the global % effort variables
 double throttlePercentEffort  = 0;    // ""
 
 // ------Serial Variables------
-boolean stringComplete = false;  // whether the string is complete
-String recievedMessage;
+byte messageStarted = false;
+byte messageComplete = false;  // whether the string is complete
+byte receivedMessage[RX_PACKET_SIZE];
+
+// ------Booleans------
+byte estopPressed = false;
+byte brakePressed = false;
+byte ignitionSwitch = false;
+byte autoSwitch = false;
+
+byte transitionToDriverEffort = false;
+byte transitionToDriverEffortComplete = false;
 
 char  buttonNames[5] = {'E', 'B', 'A', 'I', ' '};
 // Index:    0         1            2                3            4
 //        E-stop  Brake Switch  Auto Switch   Ignition Switch   Unset
 byte buttonPressed[5] = {0};
 
-String stateStrings[5] = {"Manual", "Auto", "Paused", "Estopped", "Inactive"};
-byte displayDataChanged = false;
+String stateStrings[4] = {"Manual", "Auto", "Estopped", "Inactive"};
+byte displayDataChanged = true;
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
@@ -103,16 +113,19 @@ void loop()
 
   updateButtons();
 
-  if(currentTime >= lastStateTime + STATE_TIMER)
+  if(messageComplete){ parseReceivedMessage(receivedMessage); }
+
+  currentTime = micros();
+  if(currentTime >= (lastStateTime + STATE_TIMER))
   {
-    //State();
+    stateLoop();
     lastStateTime = currentTime;
   }
 
-  if(currentTime >= lastSendTime + SEND_TIMER)
+  if(currentTime >= (lastSendTime + SEND_TIMER))
   {
     
-    //sendMessage();
+    sendMessage();
     lastSendTime = currentTime;
   }
 

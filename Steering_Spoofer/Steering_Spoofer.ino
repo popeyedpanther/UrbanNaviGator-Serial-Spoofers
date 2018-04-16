@@ -130,6 +130,7 @@ void loop()
 //======================================================================================
 byte initializeSteerer()
 {
+  static byte alreadyPrintedRun = false;
   
   if(stringComplete && !gotRun)
   {
@@ -153,13 +154,18 @@ byte initializeSteerer()
     Serial.print("READY\r");
 
     gotRun = false;
-      
+    alreadyPrintedRun = false;
     return true; 
   }
   else
-  {    
-    lcd.clear();
-    lcd.print("Waiting RUN");
+  {
+    if(!alreadyPrintedRun)
+    {
+      lcd.clear();
+      lcd.print("Waiting RUN");
+      alreadyPrintedRun = true;  
+    }
+
     return false;
   }
 }
