@@ -8,9 +8,9 @@
  * Notes:
  *  Button Scheme:
  * 
- *              (N)
+ *              (D)
  *    (P)  (R)       (B) 
- *              (D) 
+ *              (N) 
  *            
  *  P = Park            
  *  R = Reverse
