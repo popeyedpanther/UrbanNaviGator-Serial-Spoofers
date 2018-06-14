@@ -115,8 +115,9 @@ void loop()
           actuating = false;
         }
         lcd.setCursor(0,1);
-        lcd.print("c=" + String(currentSteeringPosition));
-        Serial.print("c=" + String(currentSteeringPosition) +"\r");
+        lcd.print("c=" + String(currentSteeringPosition) );
+        lcd.print(" ");
+        Serial.println("c=" + String(currentSteeringPosition));
         lastTime = currentTime;
       }
     }
@@ -142,16 +143,16 @@ byte initializeSteerer()
   if(gotRun)
   {
     lcd.clear();
-    Serial.print("HOMING\r");
+    Serial.print("HOMING\n");
     
     // Delay to represent homing
     delay(random(500,800));
     
-    Serial.print("HOMING_COMPLETE\r");
+    Serial.print("HOMING_COMPLETE\n");
     
     delay(200);
       
-    Serial.print("READY\r");
+    Serial.print("READY\n");
 
     gotRun = false;
     alreadyPrintedRun = false;
@@ -225,4 +226,3 @@ void serialEvent()
     if (inChar == '\n' or inChar == '\r') { stringComplete = true; }
   }
 }
-
