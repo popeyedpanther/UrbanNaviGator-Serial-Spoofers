@@ -115,8 +115,8 @@ void loop()
           actuating = false;
         }
         lcd.setCursor(0,1);
-        lcd.print("c=" + String(currentSteeringPosition));
-        Serial.print("c=" + String(currentSteeringPosition) +"\r");
+        lcd.print("c=" + String(currentSteeringPosition) + " " );
+        Serial.print("c=" + String(currentSteeringPosition));
         lastTime = currentTime;
       }
     }
@@ -225,4 +225,3 @@ void serialEvent()
     if (inChar == '\n' or inChar == '\r') { stringComplete = true; }
   }
 }
-
