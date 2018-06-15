@@ -10,6 +10,7 @@ int parseReceivedMessage(byte* message)
   {
     crcString.concat(message[i]);
   }
+  
   if(((unsigned int)crcString.toInt() % CRC_DIVIDER) == message[RX_PACKET_SIZE-2])
   {
     autoRequested = message[0] == 128;
@@ -54,7 +55,7 @@ void serialEvent()
     }
     else if(messageStarted) // start adding to received message
     {
-      if(messageComplete){ messageComplete = false; counter = 0; } // If we got another message before last was cleared. reset flags and overwrite.
+      if(messageComplete){ messageComplete = false; counter = 0; } // If we got another message before last was read. reset flags and overwrite.
 
       if(inByte == 127){ messageComplete = true; }
       else

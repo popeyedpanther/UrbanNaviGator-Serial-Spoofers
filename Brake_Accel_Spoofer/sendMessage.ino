@@ -32,7 +32,7 @@ void sendMessage()
     crcString.concat(sendMessageData[i]);
   }
 
-  sendMessageData[4] = (unsigned int)crcString.toInt() % 256;
+  sendMessageData[4] = (unsigned int)crcString.toInt() % CRC_DIVIDER;
   
   //Write data to serial
   Serial.write(157);
