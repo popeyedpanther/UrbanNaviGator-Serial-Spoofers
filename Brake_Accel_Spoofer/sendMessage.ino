@@ -86,12 +86,10 @@
     }
   
     sendMessageData[5] = (unsigned int)crcString.toInt() % CRC_DIVIDER;
-    sendMessageData[0] = 147;
+    sendMessageData[6] = 147;
     
     //Write data to serial
-    Serial.write(157);
-    Serial.write(sendMessageData, 5);
-    Serial.write(147);
+    Serial.write(sendMessageData, 7);
     
   }
 #endif
