@@ -2,8 +2,8 @@
  *  Email: neap@ufl.edu
  *  Last Updated: 2/21/18
  *  
- *  Used to test new Apollo interface code for the Urban NaviGator,
- *  specifically spoofing the Drive by wire board (myRIO)
+ *  Used to test new interface code for the Urban NaviGator,
+ *  specifically spoofing the drive by wire board (myRIO)
  *  
  * Notes:
  *  Button Scheme:
@@ -29,12 +29,19 @@
 #define ESTOPPED_STATE    3
 #define INACTIVE_STATE    4
 
+#define USE_OLD_MESSAGING
+
 // ---Serial Communication Parameters---
 #define BAUDRATE        115200
-#define TX_PACKET_SIZE  43
-#define HEADER_SIZE     4
-#define RX_PACKET_SIZE  9
-#define CRC_DIVIDER     256
+#ifdef USE_OLD_MESSAGING
+  #define TX_PACKET_SIZE  43
+  #define RX_PACKET_SIZE  20 //Message is oversized to allow more information to have been sent. This is legacy.
+#else
+  #define TX_PACKET_SIZE  7
+  #define RX_PACKET_SIZE  9
+  #define CRC_DIVIDER     256
+#endif
+
 
 // ---Loop Timers----
 // The timing is approximately microseconds
